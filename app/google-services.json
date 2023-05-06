@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "227220294221",
+    "firebase_url": "https://fivedegreesecurityapp-default-rtdb.firebaseio.com",
+    "project_id": "fivedegreesecurityapp",
+    "storage_bucket": "fivedegreesecurityapp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:227220294221:android:17cffd4e8aed26dcec2a04",
+        "android_client_info": {
+          "package_name": "in.fivedegree.securityapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "227220294221-gb3cad3vo4i9patg8336ihln8ah87t3a.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBUJcrf63_OuETl1mKIJ0AOJaJVUifrLV0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "227220294221-gb3cad3vo4i9patg8336ihln8ah87t3a.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

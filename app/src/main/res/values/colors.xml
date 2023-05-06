@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="dark_blue">#00487c</color>
+    <color name="semidark_blue">#027bce</color>
+    <color name="statusbar_night">#000000</color>
+    <color name="text_color">#e5e5e5</color>
+    <color name="textcolor">#252525</color>
+    <color name="hint_color">#787878</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#142129</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="whitet">#E6FFFFFF</color>
+    <color name="edit_text_bg">#f8f8f8</color>
+    <color name="green">#B5E67A</color>
+    <color name="red">#61FF0000</color>
+    <color name="greywhite">#f8f8f8</color>
+</resources>
