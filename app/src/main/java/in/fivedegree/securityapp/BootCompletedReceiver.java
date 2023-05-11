@@ -1,16 +1,8 @@
 package in.fivedegree.securityapp;
 
-import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.net.Uri;
-import android.provider.Settings;
-import android.view.View;
-import android.widget.Toast;
-
-import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -44,7 +36,7 @@ public class BootCompletedReceiver extends BroadcastReceiver {
 
                                     String isMonitoring = String.valueOf(snapshot.child("isMonitoring").getValue());
                                     if (isMonitoring.equals("true")){
-                                        Intent serviceIntent = new Intent(context, MyService.class);
+                                        Intent serviceIntent = new Intent(context, LocationService.class);
                                         context.startForegroundService(serviceIntent);
                                     }
                                 }

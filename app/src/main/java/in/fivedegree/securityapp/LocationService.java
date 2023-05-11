@@ -3,7 +3,6 @@ package in.fivedegree.securityapp;
 import android.Manifest;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -23,7 +22,6 @@ import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
-import android.util.Log;
 import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
@@ -45,7 +43,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-public class MyService extends Service {
+public class LocationService extends Service {
 
     private int interval;
     private final Handler handler = new Handler();
@@ -109,6 +107,7 @@ public class MyService extends Service {
     private final Runnable runnable = new Runnable() {
         public void run() {
             if (taskRunning) {
+                changeMonitorState();
                 getInterval();
                 getLocationUpdate();
                 if (fulladdress != null && latitude != null && longitude != null) {
@@ -132,10 +131,8 @@ public class MyService extends Service {
                 .setPriority(NotificationCompat.PRIORITY_HIGH);
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "My Service", NotificationManager.IMPORTANCE_HIGH);
-            notificationManager.createNotificationChannel(channel);
-        }
+        NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "Location Active", NotificationManager.IMPORTANCE_HIGH);
+        notificationManager.createNotificationChannel(channel);
 
         notificationManager.notify(NOTIFICATION_ID, builder.build());
 
@@ -213,9 +210,7 @@ public class MyService extends Service {
 
                         FirebaseDatabase.getInstance().getReference().child("Users").child(currentUser.getUid()).updateChildren(map).addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
-                            public void onSuccess(Void unused) {
-
-                            }
+                            public void onSuccess(Void unused) {}
                         }).addOnFailureListener(new OnFailureListener() {
                             @Override
                             public void onFailure(Exception e) {
@@ -250,7 +245,7 @@ public class MyService extends Service {
                     addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
                     if (!addresses.isEmpty()) {
                         fulladdress = addresses.get(0).getAddressLine(0);
-                    } else {
+                        } else {
                         fulladdress = "Unknown location";
                     }
                 } catch (IOException e) {
@@ -272,6 +267,37 @@ public class MyService extends Service {
                 break;
             default: ringMode = "ring";
         }
+    }
+
+    private void changeMonitorState() {
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        reference = FirebaseDatabase.getInstance().getReference();
+        assert currentUser != null;
+        reference.child("Users").child(currentUser.getUid()).get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+            @Override
+            public void onComplete(Task<DataSnapshot> task) {
+                if (task.isSuccessful()){
+                    if (task.getResult().exists()){
+                        Map<String, Object> map = new HashMap<>();
+                        map.put("isMonitoring", "true");
+
+                        FirebaseDatabase.getInstance().getReference().child("Users").child(currentUser.getUid()).updateChildren(map).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void unused) {}
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(Exception e) {
+                                Toast.makeText(getApplicationContext(), "Location update failed: "+e ,Toast.LENGTH_SHORT).show();
+
+                            }
+                        });
+                    }
+                }
+                else {
+                    Toast.makeText(getApplicationContext(), "Failed to change Monitoring State.", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
     private void flashOn() {

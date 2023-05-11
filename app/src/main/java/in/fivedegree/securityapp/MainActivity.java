@@ -1,52 +1,28 @@
 package in.fivedegree.securityapp;
 
-import static android.content.ContentValues.TAG;
-
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.app.ActivityCompat;
-import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 import android.Manifest;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
-import android.app.AlertDialog;
-import android.app.NotificationManager;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
-import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.provider.Settings;
-import android.transition.Slide;
-import android.util.Log;
-import android.util.TypedValue;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -112,39 +88,7 @@ public class MainActivity extends AppCompatActivity {
         SlideUpIcon = findViewById(R.id.slide_up_icon);
         auth = FirebaseAuth.getInstance();
 
-        if (auth.getCurrentUser() != null){
-            getDetails();
-        }
-
-        isGetDetailsRunning = true;
-        handler.postDelayed(runnable = new Runnable() {
-            public void run() {
-                handler.postDelayed(runnable, 2000);
-                try {
-                    getDetails();
-                }
-                catch (NullPointerException e){
-                    e.printStackTrace();
-                }
-                if(isServiceRunning){
-                    mainStartBtn.setVisibility(View.GONE);
-                    mainStopBtn.setVisibility(View.VISIBLE);
-                }
-                else {
-                    mainStartBtn.setVisibility(View.VISIBLE);
-                    mainStopBtn.setVisibility(View.GONE);
-                }
-                if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    PermissionWarning.setVisibility(View.VISIBLE);
-                }
-                else {
-                    PermissionWarning.setVisibility(View.GONE);
-                }
-            }
-        }, 2000);
-
-        serviceIntent = new Intent(MainActivity.this, MyService.class);
+        serviceIntent = new Intent(MainActivity.this, LocationService.class);
 
         mainStartBtn.setOnClickListener(new View.OnClickListener() {
             @TargetApi(Build.VERSION_CODES.Q)
@@ -170,9 +114,8 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else {
                     startForegroundService(serviceIntent);
-                    isServiceRunning = !isServiceRunning;
+                    isServiceRunning = true;
                     RefreshCont.setVisibility(View.VISIBLE);
-                    BottomCont.setVisibility(View.GONE);
                 }
             }
         });
@@ -180,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 stopService(serviceIntent);
-                isServiceRunning = !isServiceRunning;
+                isServiceRunning = false;
                 switchUnchecked();
             }
         });
@@ -258,7 +201,7 @@ public class MainActivity extends AppCompatActivity {
         openWeb.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String url = "https://nitesh5d.github.io/5dlocatorweb/";
+                String url = "https://www.5degree.in/5dlocator/";
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.setData(Uri.parse(url));
                 startActivity(intent);
@@ -334,7 +277,6 @@ public class MainActivity extends AppCompatActivity {
                                 isMonitoringIcon.setVisibility(View.VISIBLE);
                                 isMonitoringIcon.setImageResource(R.drawable.monitor_active);
                                 RefreshCont.setVisibility(View.GONE);
-                                BottomCont.setVisibility(View.VISIBLE);
                             }
                             else {
                                 isMonitoringTv.setText("{Error fetching monitoring status}");
@@ -389,6 +331,35 @@ public class MainActivity extends AppCompatActivity {
             startActivity(loginIntent);
             finish();
         }
+
+        isGetDetailsRunning = true;
+        handler.postDelayed(runnable = new Runnable() {
+            public void run() {
+                handler.postDelayed(runnable, 2000);
+                try {
+                    getDetails();
+                }
+                catch (NullPointerException e){
+                    Toast.makeText(MainActivity.this, "Failed to get latest update: "+e, Toast.LENGTH_SHORT).show();
+                    e.printStackTrace();
+                }
+                if(isServiceRunning){
+                    mainStartBtn.setVisibility(View.GONE);
+                    mainStopBtn.setVisibility(View.VISIBLE);
+                }
+                else {
+                    mainStartBtn.setVisibility(View.VISIBLE);
+                    mainStopBtn.setVisibility(View.GONE);
+                }
+                if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    PermissionWarning.setVisibility(View.VISIBLE);
+                }
+                else {
+                    PermissionWarning.setVisibility(View.GONE);
+                }
+            }
+        }, 2000);
     }
 
     @Override
@@ -402,5 +373,4 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         isGetDetailsRunning = false;
     }
-
 }
