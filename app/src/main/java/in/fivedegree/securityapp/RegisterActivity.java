@@ -194,11 +194,10 @@ public class RegisterActivity extends AppCompatActivity {
         TnCLink.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(RegisterActivity.this, "[No Action Added]", Toast.LENGTH_SHORT).show();
-//                String url = "https://www.5degree.in/5dlocator/tnc";
-//                Intent intent = new Intent(Intent.ACTION_VIEW);
-//                intent.setData(Uri.parse(url));
-//                startActivity(intent);
+                String url = "https://www.5degree.in/5dlocator/tnc";
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse(url));
+                startActivity(intent);
             }
         });
 

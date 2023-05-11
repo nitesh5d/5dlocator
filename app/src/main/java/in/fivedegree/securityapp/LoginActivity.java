@@ -16,6 +16,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -70,7 +71,6 @@ public class LoginActivity extends AppCompatActivity {
         ProgressCont = findViewById(R.id.progressCont);
 
         auth = FirebaseAuth.getInstance();
-
 
 
         loginBtn.setOnClickListener(new View.OnClickListener() {
@@ -165,7 +165,6 @@ public class LoginActivity extends AppCompatActivity {
                 startActivity(forgotPwIntent);
             }
         });
-
     }
 
     private void verifyAlertDialog() {
