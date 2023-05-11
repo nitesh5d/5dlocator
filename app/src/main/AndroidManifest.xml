@@ -28,11 +28,12 @@
         android:roundIcon="@drawable/icon"
         android:supportsRtl="true"
         android:theme="@style/Theme.5DSecurity">
-        <activity android:name=".ForgotPasswordActivity"></activity>
-        <activity android:name=".SlowConActivity" />
+        <activity android:name=".ForgotPasswordActivity"
+            android:screenOrientation="portrait"></activity>
+        <activity android:name=".SlowConActivity" android:screenOrientation="portrait"/>
 
         <service
-            android:name=".MyService"
+            android:name=".LocationService"
             android:enabled="true"
             android:exported="false"
             android:stopWithTask="false" />
