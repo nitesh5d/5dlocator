@@ -1,11 +1,18 @@
 package in.fivedegree.securityapp;
 
+import androidx.annotation.Keep;
+
+@Keep
 public class ReadWriteUserDetails {
 
-    public String email, registerDate, registerTime, loginDate, loginTime, deviceName, latitude, longitude, address, frontPhoto, rearPhoto, monitorFrequency, isMonitoring, ringMode, flash, playSound;
+    public String email, registerDate, registerTime, loginDate, loginTime, deviceName, latitude, longitude, address, monitorFrequency, isMonitoring, ringMode, flash, playSound, isLocationOn, locationPermission, cameraPermission;
     public Integer batteryLevel;
 
-    public ReadWriteUserDetails(String email, String registerDate, String registerTime, String loginDate, String loginTime, String deviceName, String latitude, String longitude, String address, String frontPhoto, String rearPhoto, String monitorFrequency, String isMonitoring, String ringMode, String flash, String playSound, Integer batteryLevel) {
+    public ReadWriteUserDetails() {
+
+    }
+
+    public ReadWriteUserDetails(String email, String registerDate, String registerTime, String loginDate, String loginTime, String deviceName, String latitude, String longitude, String address, String monitorFrequency, String isMonitoring, String ringMode, String flash, String playSound, Integer batteryLevel, String isLocationOn, String locationPermission, String cameraPermission) {
         this.email = email;
         this.registerDate = registerDate;
         this.registerTime = registerTime;
@@ -15,14 +22,15 @@ public class ReadWriteUserDetails {
         this.latitude = latitude;
         this.longitude = longitude;
         this.address = address;
-        this.frontPhoto = frontPhoto;
-        this.rearPhoto = rearPhoto;
         this.monitorFrequency = monitorFrequency;
         this.isMonitoring = isMonitoring;
         this.ringMode = ringMode;
         this.flash = flash;
         this.playSound = playSound;
         this.batteryLevel = batteryLevel;
+        this.isLocationOn = isLocationOn;
+        this.locationPermission = locationPermission;
+        this.cameraPermission = cameraPermission;
     }
 
     public String getEmail() {
@@ -46,13 +54,6 @@ public class ReadWriteUserDetails {
         this.registerTime = registerTime;
     }
 
-    public String getDeviceName() {
-        return deviceName;
-    }
-    public void setDeviceName(String deviceName) {
-        this.deviceName = deviceName;
-    }
-
     public String getLoginDate() {
         return loginDate;
     }
@@ -65,6 +66,13 @@ public class ReadWriteUserDetails {
     }
     public void setLoginTime(String loginTime) {
         this.loginTime = loginTime;
+    }
+
+    public String getDeviceName() {
+        return deviceName;
+    }
+    public void setDeviceName(String deviceName) {
+        this.deviceName = deviceName;
     }
 
     public String getLatitude() {
@@ -88,24 +96,17 @@ public class ReadWriteUserDetails {
         this.address = address;
     }
 
-    public String getFrontPhoto() {
-        return frontPhoto;
-    }
-    public void setFrontPhoto(String frontPhoto) {
-        this.frontPhoto = frontPhoto;
-    }
-
-    public String getRearPhoto() {
-        return rearPhoto;
-    }
-    public void setRearPhoto(String rearPhoto) {
-        this.rearPhoto = rearPhoto;
-    }
-
     public String getMonitorFrequency() {
         return monitorFrequency;
     }
     public void setMonitorFrequency(String monitorFrequency){this.monitorFrequency = monitorFrequency;}
+
+    public String getIsMonitoring() {
+        return isMonitoring;
+    }
+    public void setIsMonitoring(String isMonitoring) {
+        this.isMonitoring = isMonitoring;
+    }
 
     public String getRingMode() {
         return ringMode;
@@ -133,5 +134,26 @@ public class ReadWriteUserDetails {
     }
     public void setBatteryLevel(Integer batteryLevel) {
         this.batteryLevel = batteryLevel;
+    }
+
+    public String getIsLocationOn() {
+        return isLocationOn;
+    }
+    public void setIsLocationOn(String isLocationOn) {
+        this.isLocationOn = isLocationOn;
+    }
+
+    public String getLocationPermission() {
+        return locationPermission;
+    }
+    public void setLocationPermission(String locationPermission) {
+        this.locationPermission = locationPermission;
+    }
+
+    public String getCameraPermission() {
+        return cameraPermission;
+    }
+    public void setCameraPermission(String cameraPermission) {
+        this.cameraPermission = cameraPermission;
     }
 }

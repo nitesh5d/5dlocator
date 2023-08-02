@@ -2,7 +2,6 @@
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
     android:color="#C4E5FF">
 
-    <!--this creates the mask with the ripple effect-->
     <item
         android:id="@+id/mask"
         android:drawable="@android:color/white" />

@@ -1,6 +1,7 @@
 package in.fivedegree.securityapp;
 
 import androidx.activity.result.ActivityResultLauncher;
+import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,6 +18,7 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -107,23 +109,37 @@ public class MainActivity extends AppCompatActivity {
         serviceIntent = new Intent(MainActivity.this, LocationService.class);
 
         mainStartBtn.setOnClickListener(v -> {
+            final LocationManager manager = (LocationManager) getSystemService( Context.LOCATION_SERVICE );
             if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                Uri uri = Uri.fromParts("package", getPackageName(), null);
-                intent.setData(uri);
-                intent.putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName());
-                intent.putExtra(Settings.EXTRA_CHANNEL_ID, getApplicationInfo().uid);
-                Toast.makeText(MainActivity.this, "Go to Permission >> Location >> Select 'Allow all the time'", Toast.LENGTH_LONG).show();
-                startActivity(intent);
+
+                try {
+                    Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                    Uri uri = Uri.fromParts("package", getPackageName(), null);
+                    intent.setData(uri);
+                    Toast.makeText(MainActivity.this, "Go to Permission >> Location >> Select 'Allow all the time'", Toast.LENGTH_LONG).show();
+                    startActivity(intent);
+                }
+                catch (Exception e){
+                    e.printStackTrace();
+                }
             }
             else if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                Uri uri = Uri.fromParts("package", getPackageName(), null);
-                intent.setData(uri);
-                intent.putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName());
-                intent.putExtra(Settings.EXTRA_CHANNEL_ID, getApplicationInfo().uid);
-                Toast.makeText(MainActivity.this, "Go to Permission >> Camera >> Select 'Allow'", Toast.LENGTH_LONG).show();
-                startActivity(intent);
+                try {
+                    Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                    Uri uri = Uri.fromParts("package", getPackageName(), null);
+                    intent.setData(uri);
+                    Toast.makeText(MainActivity.this, "Go to Permission >> Camera >> Select 'Allow'. This permission is required to work with Flashlight.", Toast.LENGTH_LONG).show();
+                    startActivity(intent);
+                }
+                catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+            else if (!checkInternet()) {
+                Toast.makeText(this, "Please check your Internet Connection.", Toast.LENGTH_SHORT).show();
+            }
+            else if (!manager.isProviderEnabled( LocationManager.GPS_PROVIDER)) {
+                Toast.makeText(this, "Please Turn On your Location/GPS", Toast.LENGTH_SHORT).show();
             }
             else {
                 startForegroundService(serviceIntent);
@@ -154,9 +170,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         SlideUp.setOnClickListener(view -> {
-//                final float screenHeight = getResources().getDisplayMetrics().heightPixels;
             final int screenHeight = getResources().getDimensionPixelOffset(R.dimen.cardview_translation_y);
-//                final float translationY = 0.37f * screenHeight;
             ObjectAnimator animator;
             if (isCardVisible) {
                 animator = ObjectAnimator.ofFloat(BottomCont, "translationY", screenHeight);
@@ -196,18 +210,36 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        if (auth.getCurrentUser() != null) {
-            try {
-                PackageInfo pInfo = this.getPackageManager().getPackageInfo(this.getPackageName(), 0);
-                int version = pInfo.versionCode;
-                checkAppUpdate(version);
-            } catch (PackageManager.NameNotFoundException e) {
-                e.printStackTrace();
+        try {
+            checkInternet();
+            if (!checkInternet()) {
+                Intent badConnection = new Intent(MainActivity.this, SlowConActivity.class);
+                startActivity(badConnection);
+                finish();
             }
+
+            if (auth.getCurrentUser() == null) {
+                Intent loginIntent = new Intent(MainActivity.this, LoginActivity.class);
+                loginIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(loginIntent);
+                finish();
+            }
+
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+
+        try {
+            PackageInfo pInfo = this.getPackageManager().getPackageInfo(this.getPackageName(), 0);
+            int version = pInfo.versionCode;
+            checkAppUpdate(version);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
     }
 
+    @Keep
     private void switchUnchecked() {
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         reference = FirebaseDatabase.getInstance().getReference();
@@ -239,6 +271,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    @Keep
     public void getDetails() {
         if(!isGetDetailsRunning){
             return;
@@ -265,13 +298,21 @@ public class MainActivity extends AppCompatActivity {
 
                             isMonitoring = String.valueOf(snapshot.child("isMonitoring").getValue());
                             if (isMonitoring.equals("false")){
+                                isServiceRunning = false;
+                                mainStartBtn.setVisibility(View.VISIBLE);
+                                mainStartBtn.setEnabled(true);
+                                mainStopBtn.setVisibility(View.GONE);
+                                mainStopBtn.setEnabled(false);
                                 isMonitoringTv.setText("Not Monitoring");
                                 isMonitoringIcon.setVisibility(View.VISIBLE);
                                 isMonitoringIcon.setImageResource(R.drawable.monitor_notactive);
-                                isServiceRunning = false;
                             }
                             else if (isMonitoring.equals("true")){
                                 isServiceRunning = true;
+                                mainStartBtn.setVisibility(View.GONE);
+                                mainStartBtn.setEnabled(false);
+                                mainStopBtn.setVisibility(View.VISIBLE);
+                                mainStopBtn.setEnabled(true);
                                 isMonitoringTv.setText("Monitoring Active");
                                 isMonitoringIcon.setVisibility(View.VISIBLE);
                                 isMonitoringIcon.setImageResource(R.drawable.monitor_active);
@@ -280,6 +321,8 @@ public class MainActivity extends AppCompatActivity {
                             else {
                                 isMonitoringTv.setText("{Error fetching monitoring status}");
                                 isMonitoringIcon.setVisibility(View.GONE);
+                                mainStopBtn.setVisibility(View.VISIBLE);
+                                mainStopBtn.setEnabled(true);
                             }
 
                             latitude = String.valueOf(snapshot.child("latitude").getValue());
@@ -306,6 +349,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Keep
     private void checkAppUpdate(int currentVersion) {
         reference = FirebaseDatabase.getInstance().getReference();
         try {
@@ -337,51 +381,37 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private boolean checkInternet(){
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+    }
+
+
     @Override
     protected void onStart() {
         super.onStart();
-        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
-        if (!isConnected) {
-            Intent badConnection = new Intent(MainActivity.this, SlowConActivity.class);
-            startActivity(badConnection);
-            finish();
-        }
 
-        if (auth.getCurrentUser() == null) {
-            Intent loginIntent = new Intent(MainActivity.this, LoginActivity.class);
-            loginIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(loginIntent);
-            finish();
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            PermissionWarning.setVisibility(View.VISIBLE);
+        }
+        else {
+            PermissionWarning.setVisibility(View.GONE);
         }
 
         isGetDetailsRunning = true;
         handler.postDelayed(runnable = new Runnable() {
             public void run() {
                 handler.postDelayed(runnable, 2000);
+
                 try {
                     getDetails();
                 }
-                catch (NullPointerException e){
-                    Toast.makeText(MainActivity.this, "Failed to get latest update: "+e, Toast.LENGTH_SHORT).show();
+                catch (Exception e){
                     e.printStackTrace();
                 }
-                if(isServiceRunning){
-                    mainStartBtn.setVisibility(View.GONE);
-                    mainStopBtn.setVisibility(View.VISIBLE);
-                }
-                else {
-                    mainStartBtn.setVisibility(View.VISIBLE);
-                    mainStopBtn.setVisibility(View.GONE);
-                }
-                if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    PermissionWarning.setVisibility(View.VISIBLE);
-                }
-                else {
-                    PermissionWarning.setVisibility(View.GONE);
-                }
+
             }
         }, 2000);
     }

@@ -42,7 +42,7 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
         EmailEtv = findViewById(R.id.RegEmailEtv);
         SubmitBtn = findViewById(R.id.submitBtn);
-        ProgressCont = findViewById(R.id.LoadingCont);
+        ProgressCont = findViewById(R.id.progressCont);
 
         SubmitBtn.setOnClickListener(new View.OnClickListener() {
             @Override

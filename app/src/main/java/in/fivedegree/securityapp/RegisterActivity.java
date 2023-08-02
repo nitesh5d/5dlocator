@@ -1,5 +1,6 @@
 package in.fivedegree.securityapp;
 
+import androidx.annotation.Keep;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -109,19 +110,19 @@ public class RegisterActivity extends AppCompatActivity {
                                 String latitude = "Latitude will be displayed here.";
                                 String longitude = "Longitude will be displayed here.";
                                 String address = "Full Address goes here.";
-                                String frontPhoto = "Front Photo url";
-                                String rearPhoto = "Rear Photo url";
                                 String monitorFrequency = "10s";
                                 String isMonitoring = "false";
                                 String ringMode = "ring";
                                 String playSound = "false";
                                 String flash = "false";
                                 Integer batteryLevel = 0;
-
+                                String isLocationOn = "false";
+                                String locationPermission = "false";
+                                String cameraPermission = "false";
 
                                 FirebaseUser firebaseUser = auth.getCurrentUser();
 
-                                ReadWriteUserDetails writeuserdetails = new ReadWriteUserDetails(textemail, registerDate, registerTime, loginDate, loginTime, deviceName, latitude, longitude, address, frontPhoto, rearPhoto, monitorFrequency, isMonitoring, ringMode, flash, playSound, batteryLevel);
+                                ReadWriteUserDetails writeuserdetails = new ReadWriteUserDetails(textemail, registerDate, registerTime, loginDate, loginTime, deviceName, latitude, longitude, address, monitorFrequency, isMonitoring, ringMode, flash, playSound, batteryLevel, isLocationOn, locationPermission, cameraPermission);
 
                                 firebaseDatabase = FirebaseDatabase.getInstance();
 
@@ -202,19 +203,23 @@ public class RegisterActivity extends AppCompatActivity {
         });
 
     }
+    @Keep
     private String getCurrentTime(){
         return new SimpleDateFormat("hh:mm a", Locale.getDefault()).format(new Date());
     }
 
+    @Keep
     private String getCurrentDate(){
         return new SimpleDateFormat("dd/LLL/yyyy", Locale.getDefault()).format(new Date());
     }
 
+    @Keep
     private void hideKeybaord(View v) {
         InputMethodManager inputMethodManager = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
         inputMethodManager.hideSoftInputFromWindow(v.getApplicationWindowToken(),0);
     }
 
+    @Keep
     public void onBackPressed() {
 
         if (pressedTime + 2000 > System.currentTimeMillis()) {

@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".LoginActivity">
+    tools:context=".LoginActivity"
+    android:background="@color/white">
 
     <ImageView
         android:id="@+id/logoIv"
@@ -24,11 +26,11 @@
         android:text="Login to Your Account"
         android:textSize="18dp"
         app:fontFamily="@font/lora"
+        android:textColor="@color/black"
         app:layout_constraintBottom_toTopOf="@+id/emailCont"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/logoIv" />
-
 
     <LinearLayout
         android:id="@+id/emailCont"
@@ -118,6 +120,7 @@
         android:paddingEnd="15dp"
         android:layout_marginTop="5dp"
         android:text="Forgot password"
+        android:textColor="#252525"
         app:layout_constraintBottom_toTopOf="@id/loginBtnCont"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/pwCont" />
@@ -144,41 +147,6 @@
 
     </LinearLayout>
 
-
-    <!--    <LinearLayout-->
-    <!--        android:id="@+id/warningCont"-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:layout_marginTop="30dp"-->
-    <!--        android:orientation="horizontal"-->
-    <!--        android:layout_marginStart="40dp"-->
-    <!--        android:layout_marginEnd="40dp"-->
-    <!--        android:padding="20dp"-->
-    <!--        android:background="@drawable/warning_bg"-->
-    <!--        app:layout_constraintTop_toBottomOf="@+id/loginBtnCont">-->
-
-    <!--        <ImageView-->
-    <!--            android:layout_width="wrap_content"-->
-    <!--            android:layout_height="wrap_content"-->
-    <!--            android:layout_marginTop="2dp"-->
-    <!--            android:layout_marginEnd="4dp"-->
-    <!--            app:srcCompat="@drawable/ic_baseline_report_24" />-->
-
-    <!--        <TextView-->
-    <!--            android:id="@+id/warningTv"-->
-    <!--            android:layout_width="match_parent"-->
-    <!--            android:layout_height="wrap_content"-->
-    <!--            android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc in urna nec massa vestibulum volutpat. Duis in auctor orci, sed ornare massa."-->
-    <!--            android:textAppearance="@style/TextAppearance.AppCompat.Small"-->
-    <!--            app:fontFamily="@font/poppins_medium"-->
-    <!--            android:textSize="10dp"-->
-    <!--            android:textColor="#252525"-->
-    <!--            app:layout_constraintEnd_toEndOf="parent"-->
-    <!--            app:layout_constraintStart_toStartOf="parent"-->
-    <!--            app:layout_constraintTop_toBottomOf="@+id/button" />-->
-
-    <!--    </LinearLayout>-->
-
     <LinearLayout
         android:id="@+id/createAccCont"
         android:layout_width="match_parent"
@@ -200,6 +168,7 @@
             android:text="Create an Account"
             android:textAppearance="@style/TextAppearance.AppCompat.Small"
             android:textSize="12dp"
+            android:textColor="@color/black"
             app:fontFamily="@font/poppins_medium"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -211,19 +180,19 @@
         android:id="@+id/progressCont"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone"
+        android:background="@color/whitet"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        android:visibility="gone">
 
-        <pl.droidsonroids.gif.GifImageView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/whitet"
-            android:paddingStart="120dp"
-            android:paddingEnd="120dp"
-            android:src="@drawable/logo_anim" />
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:layout_gravity="center"
+            android:indeterminateTint="#00487c"/>
 
     </FrameLayout>
 

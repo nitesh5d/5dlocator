@@ -3,6 +3,6 @@
     <string name="dev_name"><u>Nitesh Gupta</u></string>
     <string name="visit_web"><u>Visit Web Portal</u></string>
     <string name="internet"><u>Turn on Internet</u></string>
-    <string name="permission_warning">You have not given proper permission to locate this device in the background. App may not function properly and may not be able to provide accurate location if you lose this device. Please go to the App Settings > Location, Camera > Select "Allow all the time", "Allow".</string>
-    <string name="register_warning">This application operates solely on the retrieval and preservation of location data. As a prerequisite to registering, It is strongly advise that you carefully review our Terms and Conditions of Use and Privacy Policy.</string>
+    <string name="permission_warning">You have not given necessary permissions. App may not function properly and may not be able to provide accurate information if you lose this device. Please go to the App Settings >> Location/Camera >> Select "Allow all the time"/"Allow".</string>
+    <string name="register_warning">This application operates solely on the retrieval and preservation of various device data. As a prerequisite to registering, We recommend that you read our Terms and Conditions and Privacy Policy.</string>
 </resources>

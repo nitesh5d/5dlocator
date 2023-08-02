@@ -24,10 +24,7 @@ import android.widget.Toast;
 public class SlowConActivity extends AppCompatActivity {
 
     TextView btn;
-    LinearLayout retry, refreshCont;
-
-    Handler handler = new Handler();
-    Runnable runnable;
+    LinearLayout retry;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -37,16 +34,7 @@ public class SlowConActivity extends AppCompatActivity {
 
         btn = findViewById(R.id.btn);
         retry = findViewById(R.id.retrybtn);
-        refreshCont = findViewById(R.id.refresh_cont);
 
-
-        btn.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                btn.setTextColor(Color.parseColor("#919191"));
-                return false;
-            }
-        });
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -58,23 +46,19 @@ public class SlowConActivity extends AppCompatActivity {
         retry.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                refreshCont.setVisibility(View.VISIBLE);
                 ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
                 NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
                 boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
                 if (isConnected) {
                     Intent goodConnection = new Intent(SlowConActivity.this, MainActivity.class);
-                    refreshCont.setVisibility(View.GONE);
                     startActivity(goodConnection);
                     finish();
                 }
                 else {
                     Toast.makeText(SlowConActivity.this, "No Connection", Toast.LENGTH_SHORT).show();
-                    refreshCont.setVisibility(View.GONE);
                 }
             }
         });
-
 
     }
 

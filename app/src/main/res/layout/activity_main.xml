@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
@@ -33,9 +34,10 @@
 
             <ImageView
                 android:id="@+id/logo_full"
-                android:layout_width="350px"
-                android:layout_height="45px"
-                android:src="@drawable/logo_full"/>
+                android:layout_width="300px"
+                android:layout_height="40px"
+                android:src="@drawable/logo_full"
+                android:layout_marginTop="2px"/>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -268,12 +270,12 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <pl.droidsonroids.gif.GifImageView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:src="@drawable/logo_anim"
-            android:paddingStart="120dp"
-            android:paddingEnd="120dp"/>
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:layout_gravity="center"
+            android:indeterminateTint="#00487c"/>
 
     </LinearLayout>
 
@@ -437,7 +439,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="end"
-                    android:background="@drawable/ripple_effect"
+                    android:background="@drawable/ripple_logout"
                     android:orientation="horizontal"
                     android:paddingTop="10dp"
                     android:paddingBottom="10dp"

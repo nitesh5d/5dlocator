@@ -19,14 +19,14 @@ import android.location.LocationManager;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.BatteryManager;
-import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.widget.Toast;
-
+import androidx.annotation.Keep;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
-
+import androidx.core.content.ContextCompat;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -36,13 +36,12 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+@Keep
 public class LocationService extends Service {
 
     private int interval;
@@ -51,46 +50,13 @@ public class LocationService extends Service {
     LocationManager locationManager;
     DatabaseReference reference;
     Double latitude, longitude;
-    String fulladdress, monitorFrequency, flash, playSound, ringMode;
+    String fulladdress, monitorFrequency, flash, playSound, ringMode, isLocationOn;
     Integer batteryLevel;
     private static final String CHANNEL_ID = "Main";
     private int NOTIFICATION_ID = 1;
     private CameraManager cameraManager;
     private String cameraId;
 
-    private BroadcastReceiver shutdownReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-            reference = FirebaseDatabase.getInstance().getReference();
-            assert currentUser != null;
-            reference.child("Users").child(currentUser.getUid()).get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
-                @Override
-                public void onComplete(Task<DataSnapshot> task) {
-                    if (task.isSuccessful()){
-                        if (task.getResult().exists()){
-                            Map<String, Object> map = new HashMap<>();
-                            map.put("isMonitoring", "false");
-                            FirebaseDatabase.getInstance().getReference().child("Users").child(currentUser.getUid()).updateChildren(map).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                @Override
-                                public void onSuccess(Void unused) {
-
-                                }
-                            }).addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(Exception e) {
-                                    Toast.makeText(getApplicationContext(), "Monitor status update failed: "+e ,Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                        }
-                    }
-                    else {
-                        Toast.makeText(getApplicationContext(), "Failed to change monitoring status location.", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
-        }
-    };
 
     private BroadcastReceiver batteyLevelReceiver = new BroadcastReceiver() {
         @Override
@@ -109,9 +75,9 @@ public class LocationService extends Service {
             if (taskRunning) {
                 changeMonitorState();
                 getInterval();
-                getLocationUpdate();
+                getInfoUpdate();
                 if (fulladdress != null && latitude != null && longitude != null) {
-                    storelatestLocation();
+                    storeLatestInfo();
                 }
                 handler.postDelayed(this, interval);
             }
@@ -120,18 +86,18 @@ public class LocationService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        registerReceiver(shutdownReceiver, new IntentFilter(Intent.ACTION_SHUTDOWN));
         registerReceiver(batteyLevelReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+
         Intent mainActivityIntent = new Intent(this, MainActivity.class);
         mainActivityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.drawable.icon)
-                .setContentTitle("Keeping this device safe")
-                .setContentText("App is now monitoring device location..")
+                .setContentTitle("Monitoring On")
+                .setContentText("Keeping this device safe.")
                 .setPriority(NotificationCompat.PRIORITY_HIGH);
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
-        NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "Location Active", NotificationManager.IMPORTANCE_HIGH);
+        NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "Monitoring On", NotificationManager.IMPORTANCE_HIGH);
         notificationManager.createNotificationChannel(channel);
 
         notificationManager.notify(NOTIFICATION_ID, builder.build());
@@ -179,7 +145,7 @@ public class LocationService extends Service {
 
                         playSound = String.valueOf(snapshot.child("playSound").getValue());
                         if (playSound.equals("true")){
-                            playSoundPhone();
+                            soundOn();
                         }
                     }
                 }
@@ -190,7 +156,7 @@ public class LocationService extends Service {
         });
     }
 
-    private void storelatestLocation() {
+    private void storeLatestInfo() {
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         reference = FirebaseDatabase.getInstance().getReference();
             assert currentUser != null;
@@ -207,6 +173,7 @@ public class LocationService extends Service {
                         map.put("isMonitoring", "true");
                         map.put("batteryLevel", batteryLevel);
                         map.put("ringMode", ringMode);
+                        map.put("isLocationOn", isLocationOn);
 
                         FirebaseDatabase.getInstance().getReference().child("Users").child(currentUser.getUid()).updateChildren(map).addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
@@ -227,46 +194,72 @@ public class LocationService extends Service {
         });
     }
 
-    private void getLocationUpdate() {
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        if (ActivityCompat.checkSelfPermission(getApplicationContext(),
-                Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(getApplicationContext(),
-                Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, new LocationListener() {
-            public void onLocationChanged(Location location) {
-                latitude = location.getLatitude();
-                longitude = location.getLongitude();
-                Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
-                List<Address> addresses = null;
-                try {
-                    addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
-                    if (!addresses.isEmpty()) {
-                        fulladdress = addresses.get(0).getAddressLine(0);
-                        } else {
-                        fulladdress = "Unknown location";
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
+    private final LocationListener locationListener = new LocationListener() {
+        public void onLocationChanged(Location location) {
+            latitude = location.getLatitude();
+            longitude = location.getLongitude();
+            Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
+            List<Address> addresses = null;
+            try {
+                addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+                if (!addresses.isEmpty()) {
+                    fulladdress = addresses.get(0).getAddressLine(0);
+                } else {
+                    fulladdress = "Unknown location";
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        });
-
-        AudioManager am = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
-        switch (am.getRingerMode()) {
-            case AudioManager.RINGER_MODE_SILENT:
-                ringMode = "silent";
-                break;
-            case AudioManager.RINGER_MODE_VIBRATE:
-                ringMode = "vibrate";
-                break;
-            case AudioManager.RINGER_MODE_NORMAL:
-                ringMode = "ring";
-                break;
-            default: ringMode = "ring";
         }
+        public void onProviderDisabled(String provider) {
+            try {
+                runnable.wait();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        public void onProviderEnabled(String provider) {
+            runnable.run();
+        }
+
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+            // Handle changes in location provider status (e.g., GPS status changes)
+            // You can add your own implementation here.
+        }
+    };
+
+    private void getInfoUpdate() {
+        // checking if app has location permission
+        if (ActivityCompat.checkSelfPermission(getApplicationContext(),
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(getApplicationContext(),
+                Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED){
+        }
+
+        else {
+            //getting info about location
+            locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+            if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 100, 0, locationListener);
+                isLocationOn = "true";
+            }
+            else {
+                isLocationOn = "false";
+            }
+            //getting info about ring mode.
+            AudioManager am = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+            switch (am.getRingerMode()) {
+                case AudioManager.RINGER_MODE_SILENT:
+                    ringMode = "silent";
+                    break;
+                case AudioManager.RINGER_MODE_VIBRATE:
+                    ringMode = "vibrate";
+                    break;
+                default: ringMode = "ring";
+            }
+
+        }
+
     }
 
     private void changeMonitorState() {
@@ -286,10 +279,7 @@ public class LocationService extends Service {
                             public void onSuccess(Void unused) {}
                         }).addOnFailureListener(new OnFailureListener() {
                             @Override
-                            public void onFailure(Exception e) {
-                                Toast.makeText(getApplicationContext(), "Location update failed: "+e ,Toast.LENGTH_SHORT).show();
-
-                            }
+                            public void onFailure(Exception e) {}
                         });
                     }
                 }
@@ -364,7 +354,9 @@ public class LocationService extends Service {
         }
     }
 
-    private void playSoundPhone() {
+    private void soundOn() {
+        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, 100, 0);
         final MediaPlayer mp = MediaPlayer.create(this, R.raw.alert_sound);
         mp.start();
 
@@ -405,7 +397,6 @@ public class LocationService extends Service {
     public void onDestroy() {
         super.onDestroy();
         taskRunning = false;
-        unregisterReceiver(shutdownReceiver);
         unregisterReceiver(batteyLevelReceiver);
         Toast.makeText(getApplicationContext(),"Location monitoring turned off.",Toast.LENGTH_SHORT).show();
     }
